@@ -2,8 +2,6 @@
 # Red con 8 nudos
 # Cada nudo representa una agrupación de bocas, desde el que se regarían 100 ha
 
-close all; clear; clc
-
 z0=135; % z0 cota del origen del agua
 D=transpose([0.5 0.35 0.3 0.25 0.2 0.3 0.25 0.2]); % diámetros de los tramos
 L=transpose([1000 1000 1000 1000 1000 1000 1000 1000]); % longitudes de los tramos
@@ -11,7 +9,7 @@ k=transpose([4e-5 4e-5 4e-5 4e-5 4e-5 4e-5 4e-5 4e-5]); % aspereza de arena equi
 nu=1.3e-6; % viscosidad cinemática
 
 # Caudales q y altura de presión h requeridos en cada nodo (boca o hidrante)
-q=transpose([0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1]).*(24/16*16/8); % Está basado en un caudal ficticio continuo de 1 L/s/ha
+GradoLibertad = 24/12;
 hreq=transpose([35 35 35 35 35 35 35 35]);
 
 # Coordenadas de los nudos
@@ -52,9 +50,10 @@ Z=griddata(x,y,z,X,Y);
 dimZ=size(Z);
 Zvector=reshape(Z,dimZ(1)*dimZ(2),1);
 equidCN=5;
-rangoZ=floor(min(Zvector))-equidCN:equidCN:ceil(max(Zvector))+equidCN;
+rangoZ=floor(min(Zvector)/10)*10-equidCN:equidCN:ceil(max(Zvector))+equidCN;
 contour(X,Y,Z,rangoZ,'k')
 axis([min(x) max(x) min(y) max(y)]);
+hold off
 
 # Se crea la matriz de conexiones
 caminos=zeros(numel(vectorBocas),numel(vectorBocas));
