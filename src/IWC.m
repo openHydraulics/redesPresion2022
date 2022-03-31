@@ -11,7 +11,7 @@
 
 function I=IWC(Q,D,k,nu)
     %Si Q es nulo, I también lo es
-    I=1e-4.*(abs(Q)>0);
+    I=1e-1.*(abs(Q)>0);
     Ia=2.*I;
   while sum(abs(I-Ia)>1e-6)>0
     Ia=I;

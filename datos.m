@@ -1,21 +1,20 @@
 # Datos que definen la red a estudiar
 # Red con 8 nudos
-# Cada nudo representa una agrupación de bocas, desde el que se regarían 100 ha
+# Cada nudo representa una agrupación de bocas, desde el que se regaría la correspondiente superficie
 
 z0=135; % z0 cota del origen del agua
-D=transpose([0.5 0.35 0.3 0.25 0.2 0.3 0.25 0.2]); % diámetros de los tramos
-L=transpose([1000 1000 1000 1000 1000 1000 1000 1000]); % longitudes de los tramos
+D=transpose([0.85 0.6 0.45 0.3 0.3 0.5 0.3 0.3]); % diámetros de los tramos
+L=transpose([400 400 400 400 400 400 400 400]); % longitudes de los tramos
 k=transpose([4e-5 4e-5 4e-5 4e-5 4e-5 4e-5 4e-5 4e-5]); % aspereza de arena equivalente del material de los tubos de los tramos
 nu=1.3e-6; % viscosidad cinemática
 
-# Caudales q y altura de presión h requeridos en cada nodo (boca o hidrante)
-GradoLibertad = 24/12;
+# Altura de presión h requerida en cada nodo (boca o hidrante)
 hreq=transpose([35 35 35 35 35 35 35 35]);
 
 # Coordenadas de los nudos
-x=transpose([1000 1000 2000 3000 1000 2000 3000 2000]); % abcisas de los nudos
-y=transpose([0 -1000 -1000 -1000 -2000 0 0 1000]); % ordenadas de los nudos
-z=transpose([128 134 127 126 137 127 124 122]); % cotas de de los nudos
+x=transpose([400 400 800 1200 400 800 1200 800]); % abcisas de los nudos
+y=transpose([0 -400 -400 -400 -800 0 0 400]); % ordenadas de los nudos
+z=transpose([137 134 127 126 129 127 124 122]); % cotas de de los nudos
 %z=z+5*randn(size(z)); % componente aleatoria en la cota
 
 # Vector 1 al número de bocas
@@ -42,11 +41,11 @@ xlabel('x(m)')
 ylabel('y(m)')
 
 # Curvas de nivel
-x=[0;x]; y=[0;y]; z=[z0;z];
+x=[0;x]; y=[0;y]; z_todos=[z0;z];
 X=min(x)-500:100:max(x)+500;
 Y=min(y)-500:100:max(y)+500;
 [X,Y]=meshgrid(X,Y);
-Z=griddata(x,y,z,X,Y);
+Z=griddata(x,y,z_todos,X,Y);
 dimZ=size(Z);
 Zvector=reshape(Z,dimZ(1)*dimZ(2),1);
 equidCN=5;

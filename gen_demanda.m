@@ -1,13 +1,20 @@
 # Generación con características aleatorias de la demanda de las aprox. 8640 h anuales
+%{
+  Datos necesarios:
+  - Necesidades hídricas mensuales de varios cultivos y su proporción.
+  - Superficie a regar desde cada boca (o hidrante) de la red.
+  - Valor de la relación Ra/(1-Cd), que es igual a la relación Hr/Hb entre las láminas requerida y bruta.
+  - Número de horas diarias en las que es posible realizar la operación de riego.
+%}
 
 %Se establece el valor semilla de la funcion de generacion de numeros pseudoaleatorios rand(), para que sea aleatoria.
 rand('state',sum(100*clock))
 
-# Fase 1: Determinación dotación de caudal en cada boca
+## Fase 1: Determinación dotación de caudal en cada boca
 
 cultivos=["Cereal de primavera";"Maiz dulce";"Fresa";"Puerro temprano";"Puerro mediano";"Puerro tardio";"patata media estacion";"Patata tardia";"Zanahoria temprana";"Zanahoria mediana 1";"Zanahoria mediana 2";"Cebolla temprana";"Cebolla tardia";"Remolacha mesa temprana";"Remolacha mesa tardia";"Otras horticolas"];
 
-%Necesidades hidrícas mensuales (en columnas ene, feb,...) de los cultivos (en filas Cereal de primavera, Maíz dulce,...) expresadas en mm/dia.
+# Necesidades hidrícas mensuales (en columnas ene, feb,...) de los cultivos (en filas Cereal de primavera, Maíz dulce,...) expresadas en mm/dia.
 Hr= [
 0.00	0.00	0.00	0.63	3.06	5.54	2.59	0.00	0.00	0.00	0.00	0.00;...
 0.00	0.00	0.00	0.00	1.75	5.54	3.12	0.00	0.00	0.00	0.00	0.00;...
@@ -26,32 +33,35 @@ Hr= [
 0.00	0.00	0.00	0.00	0.06	3.45	6.32	4.55	0.00	0.00	0.00	0.00;...
 0.00	0.00	0.00	0.00	1.12	4.10	6.28	5.38	0.85	0.00	0.00	0.00];
 
-%Distribución de cultivos
+# Distribución de cultivos
 distCult=[0.05;0.1;0.03;0.1;0.03;0.04;0.04;0.05;0.03;0.04;0.04;0.04;0.04;0.06;0.06;0.25];
 
-%Superficie a regar desde cada boca (ha)
-S=[100; 100; 100; 100; 100; 100; 100; 100];
+# Superficie a regar desde cada boca (ha)
+S=[16; 16; 16; 16; 16; 16; 16; 16];
 
-%Relación Ra/(1-Cd)
+# Relación Ra/(1-Cd)
 rend=0.9;
 
-%Tiempo operación estación bombeo por meses
-tfunc=[18 18 18 18 18 18 18 18 18 18 18 18];
+# Tiempo operación estación bombeo por meses
+HorasRiego = 16; % Número horas diarias para riego
+tfunc=HorasRiego*ones(8,6); % Se asume mismo número de horas para todos los meses
 
 %Caudal ficticio continuo (L/s)
 necRiego=sum(distCult.*Hr,1)./rend;%Necesidades de riego (mm/dia) mediante ponderación según la distribución de cultivos por meses
-qfc=transpose(max(transpose(S*necRiego.*(1e4/24/3600))));%Caudal ficticio continuo (L/s) necesario en cada boca
+qfc=transpose(max(transpose(S*necRiego.*(1e4/24/3600/rend))));%Caudal ficticio continuo (L/s) necesario en cada boca
 
-%Caudal asignado a cada boca (dotación) en L/s
-qboca=GradoLibertad*qfc;
+# Caudal asignado a cada boca (dotación) en L/s
+GL=[3; 3; 3; 3; 3; 3; 3; 3]; % Grado de Libertad de cada boca (relación entre el caudal asignado y el estrictamente necesario)
+% A las bocas que abastecen superficies pequeñas se les suele incrementar el Grado de Libertad
+qboca=24/HorasRiego*qfc.*GL;
 
-# Fase 2: Simulación de la demanda
+## Fase 2: Simulación de la demanda
 
 planillaRiego=zeros(numel(S),24);
 q=planillaRiego;
 diaAgno=0;
 
-%Tiempo necesario (h) para suministrar la demanda por meses
+# Tiempo necesario (h) para suministrar la demanda por meses
 triego=necRiego.*S./qboca.*1e4./3600;
 triego(isnan(triego))=0;%Se pone valor cero donde qboca es igual a cero
 duracRiego=ceil(triego);
@@ -62,12 +72,14 @@ for k=1:12%Meses del año
 
     diaAgno=diaAgno+1;
     planillaRiego=zeros(numel(S),24);
-    horaComienzo=floor(rand(numel(S),12).*(tfunc(k)-triego));%Se determina aleatoriamente la hora de comienzo del riego en cada boca y día del año
+    
+    horaComienzo=floor(rand(numel(S),12).*(tfunc(k)-triego(:,k)));%Se determina aleatoriamente la hora de comienzo del riego en cada boca y día del año
     
     for i=1:numel(S)%Boca de riego
-      
+            
       if necRiego(k)~=0 
-        planillaRiego(i,(1+horaComienzo(i,k)):(1+(horaComienzo(i,k)+duracRiego(i,k))))=1;
+        %planillaRiego(i,(1+horaComienzo(i,k)):(1+(horaComienzo(i,k)+duracRiego(i,k))))=1;
+        planillaRiego(i,(1+horaComienzo(i,k)):(horaComienzo(i,k)+duracRiego(i,k)))=1;
       endif
       
     endfor
