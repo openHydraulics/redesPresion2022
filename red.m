@@ -47,7 +47,7 @@ for i=1:numsim
     endif
 
     %Pérdida de carga en cada tramo
-    hf=IWC(Q,D,k,nu).*L;
+    hf=IWC(Q,D,ka,nu).*L;
     %hf=0*hf; % Para evaluar cuanto influyen las pérdidas de carga
     
     %Carga necesaria en cabeza para satisfacer a cada nodo

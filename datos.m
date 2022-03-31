@@ -3,9 +3,9 @@
 # Cada nudo representa una agrupación de bocas, desde el que se regaría la correspondiente superficie
 
 z0=135; % z0 cota del origen del agua
-D=transpose([0.85 0.6 0.45 0.3 0.3 0.5 0.3 0.3]); % diámetros de los tramos
+D=transpose([0.5 0.35 0.25 0.15 0.15 0.25 0.15 0.15]); % diámetros de los tramos
 L=transpose([400 400 400 400 400 400 400 400]); % longitudes de los tramos
-k=transpose([4e-5 4e-5 4e-5 4e-5 4e-5 4e-5 4e-5 4e-5]); % aspereza de arena equivalente del material de los tubos de los tramos
+ka=transpose([4e-5 4e-5 4e-5 4e-5 4e-5 4e-5 4e-5 4e-5]); % aspereza de arena equivalente del material de los tubos de los tramos
 nu=1.3e-6; % viscosidad cinemática
 
 # Altura de presión h requerida en cada nodo (boca o hidrante)
@@ -26,7 +26,7 @@ tramos=[0 1 2 3 2 1 6 6];
 tramos=[tramos;1:numel(vectorBocas)]';
 
 # Representación tramos red
-figure()
+fig01=figure();
 plot([0 x(tramos(1,2))], [0 y(tramos(1,2))],'k')
 hold on
 for i=2:vectorBocas(end) % Tramos restantes

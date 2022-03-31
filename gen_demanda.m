@@ -43,8 +43,7 @@ S=[16; 16; 16; 16; 16; 16; 16; 16];
 rend=0.9;
 
 # Tiempo operación estación bombeo por meses
-HorasRiego = 16; % Número horas diarias para riego
-tfunc=HorasRiego*ones(8,6); % Se asume mismo número de horas para todos los meses
+tfunc= [16; 16; 16; 16; 16; 16; 16; 16; 16; 16; 16; 16]; % Número horas diarias para riego para cada mes
 
 %Caudal ficticio continuo (L/s)
 necRiego=sum(distCult.*Hr,1)./rend;%Necesidades de riego (mm/dia) mediante ponderación según la distribución de cultivos por meses
@@ -53,7 +52,7 @@ qfc=transpose(max(transpose(S*necRiego.*(1e4/24/3600/rend))));%Caudal ficticio c
 # Caudal asignado a cada boca (dotación) en L/s
 GL=[3; 3; 3; 3; 3; 3; 3; 3]; % Grado de Libertad de cada boca (relación entre el caudal asignado y el estrictamente necesario)
 % A las bocas que abastecen superficies pequeñas se les suele incrementar el Grado de Libertad
-qboca=24/HorasRiego*qfc.*GL;
+qboca=24/min(tfunc)*qfc.*GL;
 
 ## Fase 2: Simulación de la demanda
 
@@ -94,7 +93,7 @@ endfor
 Q=sum(q,1);
 distQ=reshape(Q,1,[]);%Vector distribución caudales horarios de 12 meses y 30 dias por mes.
 
-figure()
+fig02=figure();
 plot(distQ)
 hold on
 plot(sort(distQ))
