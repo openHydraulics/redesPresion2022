@@ -33,7 +33,7 @@ Qbombeomax=0;
 hreq=[hreq;0;0];
 
 %Aportación bombeo
-Hbombeo=30;
+Hbombeo=59.0;
 H0=z0+Hbombeo;
 
 
@@ -60,6 +60,7 @@ Mconexmalla_hf(10,:)=[Mconex_hf(7,:) 0 1];
 
 Mconexmalla_Q=transpose(Mconexmalla_hf);
 
+# Se representa, en la figura de la red, los nuevos tramos que conforman la malla
 figure(fig01)
 hold on
 plot([x(4+1) x(9+1)],[y(4+1) y(9+1)])
@@ -105,15 +106,15 @@ for i=1:numsim
 # Indicadores
     # Indicador rendimiento energético
     % Potencia útil en las bocas con presión suficiente en relación a la potencia del bombeo
-    rendEnerg=sum(qdemand.*hreq.*((H_nodo-z)>hreq))/(Hbombeo*Qbombeo)
+    rendEnerg=sum(qdemand.*hreq.*((H_nodo-z)>hreq))/(Hbombeo*Qbombeo);
     # Coeficiente déficit energético
     % Potencia entregada "no aprovechable" en relación a la potencia requerida
     coefDef=sum(qdemand.*(H_nodo-z).*((H_nodo-z)<hreq))/sum(qdemand.*hreq);
       
     %Columnas vector resultado [c1:caudal cabeza c2: presión máxima
-    resultado=[resultado;Qbombeo max((H_nodo-z).*(hreq>0)) min((H_nodo-z).*(hreq>0))];
+    resultado=[resultado;Qbombeo max((H_nodo-z).*(hreq>0).*(qdemand>0)) min((H_nodo(1:8)-z(1:8)))];
     resultado2=[resultado2 H_nodo];
-    resultado3=[resultado3 H_nodo-(z+hreq)==min(H_nodo-(z+hreq))];
+    resultado3=[resultado3 H_nodo-z < hreq];
     resultado4=[resultado4 qdemand];
     
     %Indicadores
@@ -127,7 +128,7 @@ fig04=figure();
 subplot(1,3,1)
 plot(resultado(:,1),resultado(:,2),'+')
 axis([0 max(resultado(:,1)) min(resultado(:,3)) max(resultado(:,2))])
-xlabel('Q');ylabel('Exceso altura presión (max y min)')
+xlabel('Q');ylabel('Altura presión (max y min)')
 hold on
 plot(resultado(:,1),resultado(:,3),'+')
 plot([0 max(resultado(:,1))],[min(resultado(:,3)) min(resultado(:,3))])
@@ -135,11 +136,16 @@ hold off
 
 %resultado(lookup(resultado(:,2),max(resultado(:,2))),:)
 
-% Distribución de bocas que determinan la altura en cabeza
-for i=1:8
+% Proporción de bocas que no dispondrían de la altura requerida
+for i=1:numel(vectorBocas)
   distBocas=[distBocas sum(resultado3(i,:))];
 endfor
-distBocas=distBocas./sum(distBocas);
+if sum(distBocas) == 0
+  distBocas=zeros(1,numel(vectorBocas));
+else
+  distBocas=distBocas/size(resultado3,2);
+endif
+
 subplot(1,3,2)
 bar(distBocas)
 xlabel('boca presión mínima');ylabel('frecuencia')
